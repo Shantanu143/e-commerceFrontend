@@ -1,4 +1,4 @@
-import { useState, FormEvent, ChangeEvent } from "react";
+import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import productService from "@/service/product.service";
+import { useNavigate, useParams } from "react-router-dom";
 
 // Define interface for form data
 interface ProductData {
@@ -39,13 +40,27 @@ const initialProductData: ProductData = {
   timestamp: "",
 };
 
-const AddProduct: React.FC = () => {
+const EditProduct = () => {
   const [productData, setProductData] =
     useState<ProductData>(initialProductData);
 
   const [msg, setMsg] = useState<string>("");
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  //   getting data using use param
+
+  const data = useParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    productService
+      .getProductById(Number(data.id))
+      .then((res) => {
+        setProductData(res.data);
+      })
+      .catch((err) => console.log(err));
+  }, []);
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
@@ -100,7 +115,7 @@ const AddProduct: React.FC = () => {
       .then((res) => {
         setMsg("Product Added Successfully");
         console.log(res);
-        setProductData(initialProductData);
+        navigate("/vender/products");
       })
       .catch((err) => console.log(err));
   };
@@ -215,4 +230,4 @@ const AddProduct: React.FC = () => {
   );
 };
 
-export default AddProduct;
+export default EditProduct;

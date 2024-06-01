@@ -24,26 +24,46 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useEffect, useState } from "react";
+import productService from "@/service/product.service";
+import { Link } from "react-router-dom";
 
-interface Product {
-  img: string;
-  name: string;
-  status: string;
+interface ProductData {
+  productName: string;
+  description: string;
+  category: string;
   price: string;
-  totalSales: number;
-  createdAt: string;
+  image: string;
+  id: number;
+  timestamp: string;
 }
 const ProductList = () => {
-  const products: Product[] = [
-    {
-      img: "/placeholder.svg",
-      name: "Laser Lemonade Machine",
-      status: "Draft",
-      price: "49999",
-      totalSales: 25,
-      createdAt: "2023-07-12 10:42 AM",
-    },
-  ];
+  const [products, setProducts] = useState<ProductData[]>([]);
+  const [msg, setMsg] = useState<string>("");
+
+  useEffect(() => {
+    init();
+  }, []);
+
+  const init = async () => {
+    await productService
+      .getAllProducts()
+      .then((response) => {
+        setProducts(response.data);
+      })
+      .catch((error) => console.log(error));
+  };
+
+  const deleteProduct = async (id: number) => {
+    await productService
+      .deleteProduct(id)
+      .then((res) => {
+        setMsg("Product deleted successfully");
+        init();
+        console.log(res);
+      })
+      .catch((error) => console.log(error));
+  };
 
   return (
     <Card>
@@ -51,6 +71,11 @@ const ProductList = () => {
         <CardTitle>Products</CardTitle>
         <CardDescription>
           Manage your products and view their sales performance.
+        </CardDescription>
+        <CardDescription>
+          {msg && (
+            <span className="text-center text-3xl my-5 text-red-500">{msg}</span>
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -60,13 +85,11 @@ const ProductList = () => {
               <TableHead className="hidden w-[100px] sm:table-cell">
                 <span className="sr-only">img</span>
               </TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Product Name</TableHead>
+              <TableHead>Category</TableHead>
               <TableHead>Price</TableHead>
-              <TableHead className="hidden md:table-cell">
-                Total Sales
-              </TableHead>
-              <TableHead className="hidden md:table-cell">Created at</TableHead>
+
+              <TableHead className="hidden md:table-cell">Added at</TableHead>
               <TableHead>
                 <span className="sr-only">Actions</span>
               </TableHead>
@@ -78,21 +101,21 @@ const ProductList = () => {
                 <TableRow key={index}>
                   <TableCell className="hidden sm:table-cell">
                     <img
-                      alt="Product img"
-                      className={product.img}
+                      alt={product.image}
                       height="64"
-                      src={product.name}
+                      src={product.image}
                       width="64"
                     />
                   </TableCell>
-                  <TableCell className="font-medium">{product.name} </TableCell>
+                  <TableCell className="font-medium">
+                    {product.productName}{" "}
+                  </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{product.status}</Badge>
+                    <Badge variant="outline">{product.category}</Badge>
                   </TableCell>
                   <TableCell>₹{product.price}</TableCell>
-                  <TableCell className="hidden md:table-cell">25</TableCell>
                   <TableCell className="hidden md:table-cell">
-                    {product.createdAt}
+                    {product.timestamp}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
@@ -108,8 +131,14 @@ const ProductList = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Link to={`/vender/products/${product.id}`}>Edit</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => deleteProduct(product.id)}
+                        >
+                          Delete
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

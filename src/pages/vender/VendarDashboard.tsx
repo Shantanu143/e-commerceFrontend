@@ -7,6 +7,7 @@ import AddProduct from "@/components/customComponents/addProduct/AddProduct";
 import Orders from "@/components/customComponents/Oders/Orders";
 import ProductList from "@/components/customComponents/productList/ProductList";
 import { Route, Routes } from "react-router-dom";
+import EditProduct from "@/components/customComponents/editProduct/EditProduct";
 
 const VendarDashboard = () => {
   return (
@@ -19,6 +20,7 @@ const VendarDashboard = () => {
             <Routes>
               <Route path="/" element={<AddProduct />} />
               <Route path="/products" element={<ProductList />} />
+              <Route path="/products/:id" element={<EditProduct />} />
               <Route path="/orders" element={<Orders />} />
             </Routes>
 

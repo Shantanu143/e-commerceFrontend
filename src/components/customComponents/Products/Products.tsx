@@ -7,53 +7,34 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useCart } from "@/context/CartContext";
+import productService from "@/service/product.service";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+interface ProductData {
+  productName: string;
+  description: string;
+  category: string;
+  price: string;
+  image: string;
+  id: number;
+  timestamp: string;
+}
 const Products = () => {
-  const products = [
-    {
-      id: 1,
-      name: "Product 1",
-      price: "$10",
-      imageUrl:
-        "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/fd4a337e-51cf-46d1-9ef4-e2d41463c12d/air-force-1-07-fresh-shoes-bBRnbq.png",
-    },
-    {
-      id: 1,
-      name: "Product 1",
-      price: "$10",
-      imageUrl:
-        "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/fd4a337e-51cf-46d1-9ef4-e2d41463c12d/air-force-1-07-fresh-shoes-bBRnbq.png",
-    },
-    {
-      id: 1,
-      name: "Product 1",
-      price: "$10",
-      imageUrl:
-        "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/fd4a337e-51cf-46d1-9ef4-e2d41463c12d/air-force-1-07-fresh-shoes-bBRnbq.png",
-    },
-    {
-      id: 1,
-      name: "Product 1",
-      price: "$10",
-      imageUrl:
-        "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/fd4a337e-51cf-46d1-9ef4-e2d41463c12d/air-force-1-07-fresh-shoes-bBRnbq.png",
-    },
-    {
-      id: 1,
-      name: "Product 1",
-      price: "$10",
-      imageUrl:
-        "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/fd4a337e-51cf-46d1-9ef4-e2d41463c12d/air-force-1-07-fresh-shoes-bBRnbq.png ",
-    },
-    {
-      id: 1,
-      name: "Product 1",
-      price: "$10",
-      imageUrl:
-        "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/fd4a337e-51cf-46d1-9ef4-e2d41463c12d/air-force-1-07-fresh-shoes-bBRnbq.png ",
-    },
-  ];
+  const { addToCart } = useCart();
+  const [products, setProducts] = useState<ProductData[]>([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      await productService
+        .getAllProducts()
+        .then((res) => {
+          setProducts(res.data);
+        })
+        .catch((error) => console.log(error));
+    };
+    fetchData();
+  }, []);
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h2 className="text-4xl font-bold text-center mb-8 text-gray-600">
@@ -61,30 +42,30 @@ const Products = () => {
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3  gap-6">
         {products.map((product, index) => (
-          <Card className="w-[350px]" key={index}>
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              className="w-full h-48 object-cover"
-            />
-            <CardHeader>
-              <CardTitle>{product.name}</CardTitle>
-              <CardDescription>
-                Deploy your new project in one-click.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600">MRP: ₹10</p>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Link to={`/product/card/${index}`}>
-                <Button variant="outline">Add To Card</Button>
-              </Link>
-              <Link to={`/product/buy/${index}`}>
-                <Button>By Now</Button>
-              </Link>
-            </CardFooter>
-          </Card>
+          <Link to={`/product/${product.id}`} key={index}>
+            <Card className="w-[350px]">
+              <img
+                src={product.image}
+                alt={product.productName}
+                className="w-full h-48 object-cover"
+              />
+              <CardHeader>
+                <CardTitle>{product.productName}</CardTitle>
+                <CardDescription>{product.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">MRP: ₹{product.price}</p>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Link to="/cart" onClick={() => addToCart(product)}>
+                  <Button variant="outline">Add To Card</Button>
+                </Link>
+                <Link to={`/product/buy/${product.id}`}>
+                  <Button>By Now</Button>
+                </Link>
+              </CardFooter>
+            </Card>
+          </Link>
         ))}
       </div>
     </div>
